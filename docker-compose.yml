@@ -1,0 +1,56 @@
+# docker-compose.yml
+version: '3'
+
+services:
+
+    nginx:
+        build:
+            context: .
+            dockerfile: ./dockerfiles/nginx/Dockerfile
+        depends_on:
+            - daphne
+        ports:
+            - 80:80
+        volumes:
+            - avatars:/static/avatars/
+
+    database:
+        build:
+            context: .
+            dockerfile: ./dockerfiles/postgres/Dockerfile
+        environment:
+            POSTGRES_DB:
+            POSTGRES_USER:
+            POSTGRES_PASSWORD:
+        expose:
+            - 5432
+
+    daphne:
+        build:
+            context: .
+            dockerfile: ./dockerfiles/web/Dockerfile
+        tty: true
+        command: python3 -u -m daphne web_django.asgi:application -b daphne -p 8000
+        depends_on:
+            - database
+        restart: always
+        expose:
+           - 8000
+        volumes:
+            - avatars:/static/avatars/
+
+
+    telegram:
+        build:
+            context: .
+            dockerfile: ./dockerfiles/telegram/Dockerfile
+        command: python3 -u telegram/main.py
+        depends_on:
+            - database
+        tty: true
+        environment:
+            - PYTHONPATH=.
+
+networks:
+    database_network:
+        driver: bridge
