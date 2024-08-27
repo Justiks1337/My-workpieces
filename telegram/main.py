@@ -1,21 +1,19 @@
 import asyncio
+import os
 
-from aiogram.filters import CommandStart
-from aiogram.types import Message
+from dotenv import load_dotenv
+from aiogram import Bot
 
-from initializer import dp, bot
-
-
-dp.message(CommandStart())
+from telegram.dispatcher import dp
 
 
-async def start_command_handler(message: Message):
-    pass
+load_dotenv()
 
 
 async def main():
+    bot = Bot(os.getenv("BOT_TOKEN"))
+    # import telegram.handlers  # load handlers
     await dp.start_polling(bot)
-
 
 
 if __name__ == '__main__':
